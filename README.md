@@ -54,8 +54,6 @@ python caixa_eletronico.py
 5. **Autoatendimento** – Consulte o saldo atual, realize depósitos, saques ou confira o extrato da conta selecionada. Alterações de conta no combo box atualizam os valores imediatamente.
 6. **Encerramento** – Feche a janela do autoatendimento ou retorne à tela inicial para sair do simulador. Todos os dados ficam apenas em memória e são descartados quando o programa é encerrado.
 
-> **Capturas de tela**: por se tratar de uma aplicação desktop, as telas podem variar conforme o sistema operacional. Recomenda-se gerar screenshots locais após executar o simulador para documentar o fluxo conforme necessário.
-
 ## Dicas
 
 - Para iniciar com dados limpos basta encerrar o programa; todas as informações ficam apenas em memória.
