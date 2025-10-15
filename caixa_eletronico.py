@@ -9,10 +9,20 @@ from modelos import Cliente, ContaCorrente
 
 
 class BancoGUI:
-    def __init__(self, operacao_bancaria, conta_corrente: ContaCorrente):
+    def __init__(
+        self,
+        operacao_bancaria,
+        conta_corrente: ContaCorrente,
+        *,
+        contas_cliente: list[ContaCorrente] | None = None,
+    ):
         sg.theme("SystemDefault")
         self.conta_corrente = conta_corrente
         self.operacao_bancaria = operacao_bancaria
+        self.contas_cliente = list(contas_cliente) if contas_cliente else [conta_corrente]
+        if conta_corrente not in self.contas_cliente:
+            self.contas_cliente.append(conta_corrente)
+        self._mapa_contas = {conta.id: conta for conta in self.contas_cliente}
         cliente = self.conta_corrente.cliente
         # Cabeçalho com logotipo e título
         self.header = [
@@ -56,13 +66,7 @@ class BancoGUI:
             element_justification="center",
             expand_x=True,
         )
-        mensagem_inicial = "Bem-vindo ao Autoatendimento CAIXA"
-        if cliente:
-            mensagem_inicial = (
-                f"Bem-vindo, {cliente.nome}!\n"
-                f"Conta ativa: {self.conta_corrente.id}\n"
-                f"Saldo atual: R$ {self.conta_corrente.saldo:.2f}"
-            )
+        mensagem_inicial = self._mensagem_boas_vindas()
 
         self.display_layout = [
             [sg.Text("AUTO-ATENDIMENTO", font=("Arial", 12, "bold"), text_color="white", background_color="#003366")],
@@ -126,11 +130,18 @@ class BancoGUI:
                             ),
                             sg.Push(),
                             sg.Text(
-                                f"Conta: {self.conta_corrente.id}",
-                                key="-CONTA-ATIVA-",
+                                "Conta:",
                                 font=("Arial", 10, "bold"),
                                 text_color="black",
                                 background_color="#C0C0C0",
+                            ),
+                            sg.Combo(
+                                list(self._mapa_contas.keys()),
+                                default_value=self.conta_corrente.id,
+                                key="-CONTA-SELECIONADA-",
+                                readonly=True,
+                                enable_events=True,
+                                size=(26, 1),
                             ),
                         ]
                     ],
@@ -138,6 +149,17 @@ class BancoGUI:
                     background_color="#C0C0C0",
                     border_width=0,
                 )
+            ],
+            [
+                sg.Push(),
+                sg.Text(
+                    "",
+                    key="-RESUMO-SALDO-",
+                    font=("Arial", 10, "bold"),
+                    text_color="black",
+                    background_color="#C0C0C0",
+                ),
+                sg.Push(),
             ],
             [
                 sg.Column(self.left_buttons, element_justification="right", pad=(10, 10)),
@@ -161,10 +183,24 @@ class BancoGUI:
         self.window = sg.Window(
             "Simulador Caixa Eletrônico - Estilo CAIXA", self.layout, finalize=True, background_color="#BFBFBF"
         )
+        self._atualizar_resumo_saldo()
 
     def atualizar_tela(self, msg):
         """Atualiza a tela de mensagens"""
         self.window["-TELA-"].update(msg)
+
+    def _mensagem_boas_vindas(self) -> str:
+        cliente = self.conta_corrente.cliente
+        return (
+            f"Bem-vindo, {cliente.nome}!\n"
+            f"Conta ativa: {self.conta_corrente.id}\n"
+            f"Saldo atual: R$ {self.conta_corrente.saldo:.2f}"
+        )
+
+    def _atualizar_resumo_saldo(self) -> None:
+        self.window["-RESUMO-SALDO-"].update(
+            f"Saldo da conta selecionada: R$ {self.conta_corrente.saldo:.2f}"
+        )
 
     # def registrar(self, operacao, valor=0):
     #     """Salva operação no extrato"""
@@ -178,6 +214,20 @@ class BancoGUI:
             if event in (sg.WIN_CLOSED, "-SAIR-"):
                 sg.popup_auto_close("Saindo...", auto_close_duration=0.5)
                 break
+
+            if event == "-CONTA-SELECIONADA-":
+                conta_id = values.get("-CONTA-SELECIONADA-", "")
+                nova_conta = self._mapa_contas.get(conta_id)
+                if nova_conta and nova_conta is not self.conta_corrente:
+                    self.conta_corrente = nova_conta
+                    self.operacao_bancaria.atualizar_conta(nova_conta)
+                    self.atualizar_tela(
+                        f"{self._mensagem_boas_vindas()}\n\nSelecione uma operação utilizando os botões laterais."
+                    )
+                    self.window["-VALOR-"].update("")
+                    self._atualizar_resumo_saldo()
+                    operacao_atual = None
+                continue
 
             # Teclado numérico insere no campo de valor
             if isinstance(event, str) and event.isdigit():
@@ -214,11 +264,13 @@ class BancoGUI:
                             sucesso, mensagem = self.operacao_bancaria.saque(valor)
                             if sucesso:
                                 mensagem += f"\nSaldo atual: R$ {self.operacao_bancaria.mostrar_saldo():.2f}"
+                                self._atualizar_resumo_saldo()
                             self.atualizar_tela(mensagem)
                         elif operacao_atual == "-DEPOSITO-":
                             sucesso, msg = self.operacao_bancaria.deposito(valor)
                             if sucesso:
                                 msg += f"\nSaldo atual: R$ {self.operacao_bancaria.mostrar_saldo():.2f}"
+                                self._atualizar_resumo_saldo()
                             self.atualizar_tela(msg)
                         self.window["-VALOR-"].update("")
                     except ValueError:
@@ -286,8 +338,15 @@ def main():
         if conta_selecionada is None:
             continue
 
+        if cliente_selecionado is None:
+            cliente_selecionado = conta_selecionada.cliente
+
         operacao_bancaria = OperacaoBancaria(conta_selecionada)
-        banco_gui = BancoGUI(operacao_bancaria, conta_corrente=conta_selecionada)
+        banco_gui = BancoGUI(
+            operacao_bancaria,
+            conta_corrente=conta_selecionada,
+            contas_cliente=cliente_selecionado.contas,
+        )
         banco_gui.run()
 
 
