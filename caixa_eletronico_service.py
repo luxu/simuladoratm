@@ -8,6 +8,10 @@ class OperacaoBancaria:
         self.limite_maximo_por_saque = 500
         self.opcao = ""
 
+    def atualizar_conta(self, conta: ContaCorrente) -> None:
+        """Atualiza a conta alvo das operações bancárias."""
+        self.conta = conta
+
     def validar_se_a_quantia_digitada_nao_eh_negativa(self, dinheiro):
         return dinheiro >= 0
 

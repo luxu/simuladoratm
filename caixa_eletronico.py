@@ -1,122 +1,28 @@
-import re
-
 import FreeSimpleGUI as sg
 
+from caixa_eletronico_cadastroGUI import CadastroGUI
+from caixa_eletronico_contaGUI import ContaGUI
 from caixa_eletronico_loginGUI import LoginGUI
 from caixa_eletronico_service import OperacaoBancaria
 from caixa_eletronico_telaInicialGUI import TelaInicialGUI
 from modelos import Cliente, ContaCorrente
 
 
-class CadastroGUI:
-    """Tela inicial para cadastro do usuário."""
-
-    def __init__(self, clientes):
-        sg.theme("SystemDefault")
-        self.clientes = clientes
-        self.layout = [
-            [sg.Text("Cadastro do Usuário", font=("Arial", 14, "bold"))],
-            [sg.Text("Nome", size=(18, 1)), sg.Input(key="-NOME-", focus=True)],
-            [sg.Text("CPF", size=(18, 1)), sg.Input(key="-CPF-")],
-            [sg.Text("Senha", size=(18, 1)), sg.Input(key="-SENHA-", password_char="*")],
-            [sg.Text("Depósito inicial", size=(18, 1)), sg.Input(key="-DEPOSITO-")],
-            [
-                sg.Text(
-                    "",
-                    key="-ERROS-",
-                    size=(40, 3),
-                    text_color="red",
-                    background_color="lightyellow",
-                    visible=False,
-                )
-            ],
-            [
-                sg.Push(),
-                sg.Button("Cancelar", key="-CANCELAR-", button_color=("white", "#A93226")),
-                sg.Button("Cadastrar", key="-CADASTRAR-", button_color=("white", "#1E8449")),
-            ],
-        ]
-        self.window = sg.Window("Cadastro", self.layout, finalize=True)
-
-    def _validar_campos(self, values):
-        erros = []
-
-        cpf = values.get("-CPF-", "")
-        cpf_numeros = re.sub(r"\D", "", cpf)
-        if len(cpf_numeros) != 11:
-            erros.append("CPF deve conter 11 dígitos numéricos.")
-
-        cliente_existente = self.clientes.get(cpf_numeros)
-
-        nome = values.get("-NOME-", "").strip()
-        senha = values.get("-SENHA-", "")
-
-        if cliente_existente is None:
-            if not nome:
-                erros.append("Nome é obrigatório.")
-            if len(senha) < 4:
-                erros.append("Senha deve ter pelo menos 4 caracteres.")
-        else:
-            nome = cliente_existente.nome
-            senha = cliente_existente.senha
-
-        deposito_raw = values.get("-DEPOSITO-", "").replace(",", ".")
-        try:
-            deposito = float(deposito_raw)
-            if deposito < 0:
-                erros.append("Depósito inicial não pode ser negativo.")
-        except ValueError:
-            erros.append("Informe um valor numérico para o depósito inicial.")
-            deposito = None
-
-        return erros, {
-            "nome": nome,
-            "cpf": cpf_numeros,
-            "senha": senha,
-            "deposito_inicial": deposito if deposito is not None else 0.0,
-            "cliente_existente": cliente_existente,
-        }
-
-    def run(self):
-        while True:
-            event, values = self.window.read()
-
-            if event in (sg.WIN_CLOSED, "-CANCELAR-"):
-                cadastro = None
-                break
-
-            if event == "-CADASTRAR-":
-                erros, cadastro = self._validar_campos(values)
-                if erros:
-                    self.window["-ERROS-"].update("\n".join(erros), visible=True)
-                    continue
-                self.window["-ERROS-"].update("", visible=False)
-                cliente = cadastro["cliente_existente"]
-                novo_cliente = cliente is None
-                if cliente is None:
-                    cliente = Cliente(
-                        nome=cadastro["nome"],
-                        cpf=cadastro["cpf"],
-                        senha=cadastro["senha"],
-                    )
-                    self.clientes[cadastro["cpf"]] = cliente
-                conta = ContaCorrente(cliente, saldo_inicial=cadastro["deposito_inicial"])
-                cadastro = {
-                    "cliente": cliente,
-                    "conta": conta,
-                    "novo_cliente": novo_cliente,
-                }
-                break
-
-        self.window.close()
-        return cadastro
-
-
 class BancoGUI:
-    def __init__(self, operacao_bancaria, conta_corrente: ContaCorrente):
+    def __init__(
+        self,
+        operacao_bancaria,
+        conta_corrente: ContaCorrente,
+        *,
+        contas_cliente: list[ContaCorrente] | None = None,
+    ):
         sg.theme("SystemDefault")
         self.conta_corrente = conta_corrente
         self.operacao_bancaria = operacao_bancaria
+        self.contas_cliente = list(contas_cliente) if contas_cliente else [conta_corrente]
+        if conta_corrente not in self.contas_cliente:
+            self.contas_cliente.append(conta_corrente)
+        self._mapa_contas = {conta.id: conta for conta in self.contas_cliente}
         cliente = self.conta_corrente.cliente
         # Cabeçalho com logotipo e título
         self.header = [
@@ -160,13 +66,7 @@ class BancoGUI:
             element_justification="center",
             expand_x=True,
         )
-        mensagem_inicial = "Bem-vindo ao Autoatendimento CAIXA"
-        if cliente:
-            mensagem_inicial = (
-                f"Bem-vindo, {cliente.nome}!\n"
-                f"Conta ativa: {self.conta_corrente.id}\n"
-                f"Saldo atual: R$ {self.conta_corrente.saldo:.2f}"
-            )
+        mensagem_inicial = self._mensagem_boas_vindas()
 
         self.display_layout = [
             [sg.Text("AUTO-ATENDIMENTO", font=("Arial", 12, "bold"), text_color="white", background_color="#003366")],
@@ -230,11 +130,18 @@ class BancoGUI:
                             ),
                             sg.Push(),
                             sg.Text(
-                                f"Conta: {self.conta_corrente.id}",
-                                key="-CONTA-ATIVA-",
+                                "Conta:",
                                 font=("Arial", 10, "bold"),
                                 text_color="black",
                                 background_color="#C0C0C0",
+                            ),
+                            sg.Combo(
+                                list(self._mapa_contas.keys()),
+                                default_value=self.conta_corrente.id,
+                                key="-CONTA-SELECIONADA-",
+                                readonly=True,
+                                enable_events=True,
+                                size=(26, 1),
                             ),
                         ]
                     ],
@@ -242,6 +149,17 @@ class BancoGUI:
                     background_color="#C0C0C0",
                     border_width=0,
                 )
+            ],
+            [
+                sg.Push(),
+                sg.Text(
+                    "",
+                    key="-RESUMO-SALDO-",
+                    font=("Arial", 10, "bold"),
+                    text_color="black",
+                    background_color="#C0C0C0",
+                ),
+                sg.Push(),
             ],
             [
                 sg.Column(self.left_buttons, element_justification="right", pad=(10, 10)),
@@ -265,10 +183,24 @@ class BancoGUI:
         self.window = sg.Window(
             "Simulador Caixa Eletrônico - Estilo CAIXA", self.layout, finalize=True, background_color="#BFBFBF"
         )
+        self._atualizar_resumo_saldo()
 
     def atualizar_tela(self, msg):
         """Atualiza a tela de mensagens"""
         self.window["-TELA-"].update(msg)
+
+    def _mensagem_boas_vindas(self) -> str:
+        cliente = self.conta_corrente.cliente
+        return (
+            f"Bem-vindo, {cliente.nome}!\n"
+            f"Conta ativa: {self.conta_corrente.id}\n"
+            f"Saldo atual: R$ {self.conta_corrente.saldo:.2f}"
+        )
+
+    def _atualizar_resumo_saldo(self) -> None:
+        self.window["-RESUMO-SALDO-"].update(
+            f"Saldo da conta selecionada: R$ {self.conta_corrente.saldo:.2f}"
+        )
 
     # def registrar(self, operacao, valor=0):
     #     """Salva operação no extrato"""
@@ -282,6 +214,20 @@ class BancoGUI:
             if event in (sg.WIN_CLOSED, "-SAIR-"):
                 sg.popup_auto_close("Saindo...", auto_close_duration=0.5)
                 break
+
+            if event == "-CONTA-SELECIONADA-":
+                conta_id = values.get("-CONTA-SELECIONADA-", "")
+                nova_conta = self._mapa_contas.get(conta_id)
+                if nova_conta and nova_conta is not self.conta_corrente:
+                    self.conta_corrente = nova_conta
+                    self.operacao_bancaria.atualizar_conta(nova_conta)
+                    self.atualizar_tela(
+                        f"{self._mensagem_boas_vindas()}\n\nSelecione uma operação utilizando os botões laterais."
+                    )
+                    self.window["-VALOR-"].update("")
+                    self._atualizar_resumo_saldo()
+                    operacao_atual = None
+                continue
 
             # Teclado numérico insere no campo de valor
             if isinstance(event, str) and event.isdigit():
@@ -318,11 +264,13 @@ class BancoGUI:
                             sucesso, mensagem = self.operacao_bancaria.saque(valor)
                             if sucesso:
                                 mensagem += f"\nSaldo atual: R$ {self.operacao_bancaria.mostrar_saldo():.2f}"
+                                self._atualizar_resumo_saldo()
                             self.atualizar_tela(mensagem)
                         elif operacao_atual == "-DEPOSITO-":
                             sucesso, msg = self.operacao_bancaria.deposito(valor)
                             if sucesso:
                                 msg += f"\nSaldo atual: R$ {self.operacao_bancaria.mostrar_saldo():.2f}"
+                                self._atualizar_resumo_saldo()
                             self.atualizar_tela(msg)
                         self.window["-VALOR-"].update("")
                     except ValueError:
@@ -352,7 +300,7 @@ def main():
         conta_selecionada: ContaCorrente | None = None
         cliente_selecionado: Cliente | None = None
 
-        if escolha == "cadastro":
+        if escolha == "cadastro_cliente":
             cadastro_gui = CadastroGUI(catalogo_clientes)
             cadastro = cadastro_gui.run()
             if cadastro is None:
@@ -360,6 +308,19 @@ def main():
             cliente_selecionado = cadastro["cliente"]
             conta_selecionada = cadastro["conta"]
             catalogo_clientes[cliente_selecionado.cpf] = cliente_selecionado
+            catalogo_contas[conta_selecionada.id] = conta_selecionada
+        elif escolha == "cadastro_conta":
+            if not catalogo_clientes:
+                sg.popup_ok(
+                    "Nenhum cliente cadastrado. Cadastre um cliente antes de criar contas."
+                )
+                continue
+            conta_gui = ContaGUI(catalogo_clientes)
+            cadastro_conta = conta_gui.run()
+            if cadastro_conta is None:
+                continue
+            cliente_selecionado = cadastro_conta["cliente"]
+            conta_selecionada = cadastro_conta["conta"]
             catalogo_contas[conta_selecionada.id] = conta_selecionada
         elif escolha == "login":
             if not catalogo_clientes:
@@ -377,8 +338,15 @@ def main():
         if conta_selecionada is None:
             continue
 
+        if cliente_selecionado is None:
+            cliente_selecionado = conta_selecionada.cliente
+
         operacao_bancaria = OperacaoBancaria(conta_selecionada)
-        banco_gui = BancoGUI(operacao_bancaria, conta_corrente=conta_selecionada)
+        banco_gui = BancoGUI(
+            operacao_bancaria,
+            conta_corrente=conta_selecionada,
+            contas_cliente=cliente_selecionado.contas,
+        )
         banco_gui.run()
 
 
