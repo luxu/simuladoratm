@@ -29,10 +29,20 @@ class TelaInicialGUI:
             [
                 sg.Push(),
                 sg.Button(
-                    "Criar nova conta",
+                    "Cadastrar cliente",
                     key="-CADASTRO-",
                     size=(18, 2),
                     button_color=("white", "#1E8449"),
+                ),
+                sg.Push(),
+            ],
+            [
+                sg.Push(),
+                sg.Button(
+                    "Cadastrar conta",
+                    key="-CADASTRO-CONTA-",
+                    size=(18, 2),
+                    button_color=("white", "#117A65"),
                 ),
                 sg.Push(),
             ],
@@ -55,7 +65,10 @@ class TelaInicialGUI:
                 escolha = "login"
                 break
             if event == "-CADASTRO-":
-                escolha = "cadastro"
+                escolha = "cadastro_cliente"
+                break
+            if event == "-CADASTRO-CONTA-":
+                escolha = "cadastro_conta"
                 break
         self.window.close()
         return escolha
