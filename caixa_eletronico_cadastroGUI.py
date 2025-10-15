@@ -12,11 +12,19 @@ class CadastroGUI:
         sg.theme("SystemDefault")
         self.clientes = clientes
         self.layout = [
-            [sg.Text("Cadastro do Usuário", font=("Arial", 14, "bold"))],
+            [
+                sg.Text(
+                    "Cadastrar novo cliente e primeira conta",
+                    font=("Arial", 14, "bold"),
+                )
+            ],
             [sg.Text("Nome", size=(18, 1)), sg.Input(key="-NOME-", focus=True)],
             [sg.Text("CPF", size=(18, 1)), sg.Input(key="-CPF-")],
             [sg.Text("Senha", size=(18, 1)), sg.Input(key="-SENHA-", password_char="*")],
-            [sg.Text("Depósito inicial", size=(18, 1)), sg.Input(key="-DEPOSITO-")],
+            [
+                sg.Text("Depósito inicial da conta", size=(18, 1)),
+                sg.Input(key="-DEPOSITO-"),
+            ],
             [
                 sg.Text(
                     "",
@@ -30,10 +38,14 @@ class CadastroGUI:
             [
                 sg.Push(),
                 sg.Button("Cancelar", key="-CANCELAR-", button_color=("white", "#A93226")),
-                sg.Button("Cadastrar", key="-CADASTRAR-", button_color=("white", "#1E8449")),
+                sg.Button(
+                    "Cadastrar cliente",
+                    key="-CADASTRAR-",
+                    button_color=("white", "#1E8449"),
+                ),
             ],
         ]
-        self.window = sg.Window("Cadastro", self.layout, finalize=True)
+        self.window = sg.Window("Novo cliente", self.layout, finalize=True)
 
     def _validar_campos(self, values):
         erros = []
