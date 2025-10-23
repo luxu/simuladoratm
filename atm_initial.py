@@ -1,5 +1,3 @@
-import csv
-
 import FreeSimpleGUI as sg
 
 from atm_bankGUI import BankGUI
@@ -7,29 +5,16 @@ from atm_homeScreenGUI import HomeScreenlGUI
 from atm_loginGUI import LoginGUI
 from atm_registerAccountGUI import RegisterAccountGUI
 from atm_registerClientGUI import RegisterClientGUI
+from repositories import AccountRepository, ClientRepository
 
 
 def main():
-    catalog_accounts = []
-    catalog_clients = []
     client_csv = "list_client.csv"
     accounts_csv = "list_accounts.csv"
-    with open(client_csv, "r") as _f:
-        rows = csv.DictReader(_f)
-        for row in rows:
-            catalog_clients.append({
-                'name': row['name'].strip(),
-                'cpf': row['cpf'].strip(),
-                'password': row['password'].strip(),
-            })
-    with open(accounts_csv, "r") as _f:
-        rows = csv.DictReader(_f)
-        for row in rows:
-            catalog_accounts.append({
-                'cpf': row['cpf'].strip(),
-                'number_account': row['number_account'].strip(),
-                'total': row['total'].strip(),
-            })
+    clients_repo = ClientRepository(client_csv)
+    accounts_repo = AccountRepository(accounts_csv)
+    catalog_clients = clients_repo.all()
+    catalog_accounts = accounts_repo.all()
     while True:
         home_screen = HomeScreenlGUI()
         choice = home_screen.run()
@@ -40,7 +25,8 @@ def main():
             register_gui = RegisterClientGUI(catalog_clients)
             register = register_gui.run()
             if register:
-                catalog_clients.append(register)
+                clients_repo.add(register)
+                clients_repo.save()
         elif choice == "register_account":
             if not catalog_clients:
                 sg.popup_ok("Nenhum cliente cadastrado. Cadastre um cliente antes de criar accounts.")
@@ -48,7 +34,8 @@ def main():
             account_gui = RegisterAccountGUI(catalog_clients, catalog_accounts)
             new_account = account_gui.run()
             if len(new_account) > 0:
-                catalog_accounts.append(new_account)
+                accounts_repo.add(new_account)
+                accounts_repo.save()
         elif choice == "login":
             if not catalog_clients or not catalog_accounts:
                 sg.popup_ok("Nenhuma conta/cliente cadastrados. Crie para acessar.")
