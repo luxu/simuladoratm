@@ -12,7 +12,9 @@ from atm_registerClientGUI import RegisterClientGUI
 def main():
     catalog_accounts = []
     catalog_clients = []
-    with open("list_client.csv", "r") as _f:
+    client_csv = "list_client.csv"
+    accounts_csv = "list_accounts.csv"
+    with open(client_csv, "r") as _f:
         rows = csv.DictReader(_f)
         for row in rows:
             catalog_clients.append({
@@ -20,7 +22,7 @@ def main():
                 'cpf': row['cpf'].strip(),
                 'password': row['password'].strip(),
             })
-    with open("list_accounts.csv", "r") as _f:
+    with open(accounts_csv, "r") as _f:
         rows = csv.DictReader(_f)
         for row in rows:
             catalog_accounts.append({
