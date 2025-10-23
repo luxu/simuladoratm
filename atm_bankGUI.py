@@ -3,6 +3,14 @@ import FreeSimpleGUI as sg
 from partials import elements_screen
 from atm_service import BankOperation
 
+
+EVENT_NAMES = {
+    "-BALANCE-": "consulta de saldo",
+    "-EXTRACT-": "visualização do extrato",
+    "-SAKE-": "saque",
+    "-DEPOSIT-": "depósito",
+}
+
 class BankGUI:
     def __init__(self, banking_operation):
         sg.theme("SystemDefault")
@@ -10,7 +18,7 @@ class BankGUI:
         total = banking_operation['account'][0]['total']
         self.bankOperation = BankOperation(total)
         layout = elements_screen.get_layout(banking_operation)
-        self.window = sg.Window("Simulador Caixa Eletrônico - Estilo CAIXA", layout, finalize=True, background_color="#BFBFBF")
+        self.window = sg.Window("Simulador Caixa Eletrônico Estilo CAIXA", layout, finalize=True, background_color="#BFBFBF")
 
     def screen_update(self, msg):
         self.window["-SCREEN-"].update(msg)
@@ -35,9 +43,13 @@ class BankGUI:
                     msg = f"Saldo atual: R$ {float(self.bankOperation.balance()):.2f}"
                 elif event == "-EXTRACT-":
                     operacoes = self.bankOperation.extract()
-                    msg = "Últimas operações:\n" + "\n".join(operacoes[-5:]) if operacoes else "Nenhuma movimentação registrada."
+                    if operacoes:
+                        msg = "Últimas operações:\n" + "\n".join(operacoes[-5:])
+                    else:
+                        msg = "Nenhuma movimentação registrada."
                 else:
-                    msg = f"Digite o valor para {event[1:].capitalize().lower()} e pressione Confirmar."
+                    nome_operacao = EVENT_NAMES.get(event, "operação selecionada")
+                    msg = f"Digite o valor para {nome_operacao} e pressione Confirmar."
                 self.screen_update(msg)
 
             # Confirmar operação
@@ -45,6 +57,14 @@ class BankGUI:
                 if operacao_atual in ("-SAKE-", "-DEPOSIT-"):
                     value = values["-VALUE-"].strip()
                     msg = ""
+                    try:
+                        float(str(value).replace(",", "."))
+                    except ValueError:
+                        nome_operacao = EVENT_NAMES.get(operacao_atual, "operação selecionada")
+                        msg = f"Valor inválido para {nome_operacao}. Informe um número maior que zero."
+                        self.screen_update(msg)
+                        continue
+
                     if operacao_atual == "-SAKE-":
                         success, msg = self.bankOperation.sake(value)
                         if success:
