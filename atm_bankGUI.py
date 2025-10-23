@@ -43,20 +43,17 @@ class BankGUI:
             # Confirmar operação
             if event in {"-CONFIRM-", "-OK-"}:
                 if operacao_atual in ("-SAKE-", "-DEPOSIT-"):
-                    try:
-                        value = float(values["-VALUE-"])
-                        msg = ''
-                        if operacao_atual == "-SAKE-":
-                            success, msg = self.bankOperation.sake(value)
-                            if success:
-                                msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
-                        elif operacao_atual == "-DEPOSIT-":
-                            success, msg = self.bankOperation.deposit(value)
-                            if success:
-                                msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
-                        self.window["-VALUE-"].update("")
-                    except ValueError as err:
-                        msg = f'Erro ao realizar {operacao_atual[1:].capitalize()}: {err}'
+                    value = values["-VALUE-"].strip()
+                    msg = ""
+                    if operacao_atual == "-SAKE-":
+                        success, msg = self.bankOperation.sake(value)
+                        if success:
+                            msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
+                    elif operacao_atual == "-DEPOSIT-":
+                        success, msg = self.bankOperation.deposit(value)
+                        if success:
+                            msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
+                    self.window["-VALUE-"].update("")
                     self.screen_update(msg)
                 operacao_atual = None
 

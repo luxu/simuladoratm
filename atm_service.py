@@ -14,22 +14,40 @@ class BankOperation:
         return self.operation
 
     def deposit(self, value):
+        error_msg = "Valor inválido. Informe um número maior que zero."
+        try:
+            amount = float(str(value).replace(",", "."))
+        except (TypeError, ValueError):
+            return False, error_msg
+
+        if amount <= 0:
+            return False, error_msg
+
         value_old = f'R$ {float(self.account):.2f}'
-        self.account += float(value)
-        value = f'R$ {float(value):.2f}'
+        self.account += amount
+        value_formatted = f'R$ {amount:.2f}'
         value_new = f'R$ {float(self.account):.2f}'
-        msg = f"{value} | +{value_old} | {value_new}"
+        msg = f"{value_formatted} | +{value_old} | {value_new}"
         self.operation.append(msg)
-        return True, f"Depósito de R$ {value} realizado."
+        return True, f"Depósito de {value_formatted} realizado."
 
     def sake(self, value):
         # Verifica se tem saldo suficiente
-        if not self.is_value(value):
+        error_msg = "Valor inválido. Informe um número maior que zero."
+        try:
+            amount = float(str(value).replace(",", "."))
+        except (TypeError, ValueError):
+            return False, error_msg
+
+        if amount <= 0:
+            return False, error_msg
+
+        if not self.is_value(amount):
             return False, "Valor maior do que saldo. Reveja!"
         value_old = f'R$ {float(self.account):.2f}'
-        self.account -= float(value)
-        value = f'R$ {float(value):.2f}'
+        self.account -= amount
+        value_formatted = f'R$ {amount:.2f}'
         value_new = f'R$ {float(self.account):.2f}'
-        msg = f"{value} | -{value_old} | {value_new}"
+        msg = f"{value_formatted} | -{value_old} | {value_new}"
         self.operation.append(msg)
-        return True, f"Saque de R$ {value} realizado."
+        return True, f"Saque de {value_formatted} realizado."
