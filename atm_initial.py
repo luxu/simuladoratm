@@ -1,3 +1,5 @@
+import csv
+
 import FreeSimpleGUI as sg
 
 from atm_bankGUI import BankGUI
@@ -45,7 +47,14 @@ def main():
             if not banking_operation:
                 continue
             bankGui = BankGUI(banking_operation)
-            bankGui.run()
+            updated_operation = bankGui.run()
+            if updated_operation:
+                fieldnames = ["cpf", "number_account", "total"]
+                with open(accounts_csv, "w", newline="") as file:
+                    writer = csv.DictWriter(file, fieldnames=fieldnames)
+                    writer.writeheader()
+                    for account in catalog_accounts:
+                        writer.writerow({key: str(account.get(key, "")) for key in fieldnames})
         else:
             continue
 
