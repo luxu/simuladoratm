@@ -23,7 +23,7 @@ def _build_value_entry() -> list[list[sg.Element]]:
     return [[
         sg.Text("Valor: R$", font=("Arial", 11)),
         sg.Input(key="-VALUE-", size=(15, 1), font=("Arial", 11)),
-        sg.Button("OK", key="-OK-"),
+        sg.Button("Inserir", key="-OK-"),
     ]]
 
 
@@ -80,14 +80,14 @@ def get_layout(banking_operation):
     client = banking_operation.get("client")
     current_account = banking_operation.get("account")[0]
     initial_message = (
-        f"Bem-vindo, {client['name']}!\n"
+        f"Bem vindo, {client['name']}!\n"
         f"Conta ativa: {current_account['number_account']}\n"
         f"Saldo atual: R$ {current_account['total']}"
         if client
-        else "Bem-vindo!"
+        else "Bem vindo!"
     )
     display_layout = [
-        [sg.Text("AUTO-ATENDIMENTO", font=("Arial", 12, "bold"), text_color="white", background_color="#003366")],
+        [sg.Text("AUTOATENDIMENTO", font=("Arial", 12, "bold"), text_color="white", background_color="#003366")],
         [sg.Multiline(f"{initial_message}\n\nSelecione uma operação utilizando os botões laterais.",
                       size=(40, 10), key="-SCREEN-", disabled=True, background_color="#0060A8", text_color="white",
                       border_width=0, font=("Consolas", 11), pad=(5, 5), )],
