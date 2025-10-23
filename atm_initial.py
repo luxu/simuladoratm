@@ -53,6 +53,8 @@ def main():
                 continue
             login_gui = LoginGUI(catalog_clients, catalog_accounts)
             banking_operation = login_gui.run()
+            if not banking_operation:
+                continue
             bankGui = BankGUI(banking_operation)
             bankGui.run()
         else:

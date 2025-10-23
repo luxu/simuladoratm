@@ -36,10 +36,34 @@ class LoginGUI:
         cpf = self._sanitizar_cpf(values.get("-CPF-", ""))
         password = values.get("-PASSWORD-", "")
         account_id = values.get("-ACCOUNT-", "")
-        account = [account for account in self.accounts if account['number_account'] == account_id]
-        client = [client for client in self.clients if client['cpf'] == cpf][0]
-        if client['password'] != password:
+
+        client = None
+        if not cpf:
+            errors.append("Selecione um CPF para continuar.")
+        else:
+            matching_clients = [client for client in self.clients if client['cpf'] == cpf]
+            if not matching_clients:
+                errors.append("CPF não encontrado.")
+            else:
+                client = matching_clients[0]
+
+        if not password:
+            errors.append("Informe a senha.")
+
+        account = []
+        if account_id:
+            account = [account for account in self.accounts if account['number_account'] == account_id]
+            if not account:
+                errors.append("Conta selecionada inválida.")
+        else:
+            errors.append("Selecione uma conta.")
+
+        if client and password and client['password'] != password:
             errors.append("Senha incorreta.")
+
+        if errors:
+            return errors, None
+
         return errors, {"client": client, "account": account}
 
     def run(self):
