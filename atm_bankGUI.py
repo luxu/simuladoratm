@@ -68,10 +68,14 @@ class BankGUI:
                     if operacao_atual == "-SAKE-":
                         success, msg = self.bankOperation.sake(value)
                         if success:
+                            novo_saldo = f"{self.bankOperation.balance():.2f}"
+                            self.bank_operation["account"][0]["total"] = novo_saldo
                             msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
                     elif operacao_atual == "-DEPOSIT-":
                         success, msg = self.bankOperation.deposit(value)
                         if success:
+                            novo_saldo = f"{self.bankOperation.balance():.2f}"
+                            self.bank_operation["account"][0]["total"] = novo_saldo
                             msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
                     self.window["-VALUE-"].update("")
                     self.screen_update(msg)
@@ -83,3 +87,4 @@ class BankGUI:
                 self.window["-VALUE-"].update("")
                 self.screen_update("Operação cancelada. Escolha outra opção.")
         self.window.close()
+        return self.bank_operation
