@@ -11,7 +11,7 @@ class ContaCorrente:
     def __init__(self, cliente: "Cliente", *, conta_id: Optional[str] = None, saldo_inicial: float = 0.0) -> None:
         self.id: str = conta_id or str(uuid4())
         self._cliente: Optional["Cliente"] = None
-        self.saldo: float = 0.0
+        self.total: float = 0.0
         self.extrato: List[str] = []
         self.vincular_cliente(cliente)
         if saldo_inicial:
@@ -38,15 +38,15 @@ class ContaCorrente:
     def depositar(self, valor: float, descricao: Optional[str] = None) -> None:
         if valor < 0:
             raise ValueError("Não é permitido valor negativo.")
-        self.saldo += valor
+        self.total += valor
         self.registrar_operacao("D", valor, descricao)
 
     def sacar(self, valor: float) -> None:
         if valor < 0:
             raise ValueError("Não é permitido valor negativo.")
-        if valor > self.saldo:
+        if valor > self.total:
             raise ValueError("Saldo insuficiente.")
-        self.saldo -= valor
+        self.total -= valor
         self.registrar_operacao("R", valor)
 
 
