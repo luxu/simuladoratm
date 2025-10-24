@@ -22,7 +22,8 @@ class LoginGUI:
         ]
         self.window = sg.Window("Login", self.layout, finalize=True)
 
-    def _sanitizar_cpf(self, cpf: str) -> str:
+    @staticmethod
+    def _sanitizar_cpf(cpf: str) -> str:
         return re.sub(r"\D", "", cpf or "")
 
     def _update_accounts_available(self, cpf: str) -> None:
