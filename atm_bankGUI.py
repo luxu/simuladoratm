@@ -56,27 +56,16 @@ class BankGUI:
             if event in {"-CONFIRM-", "-OK-"}:
                 if operacao_atual in ("-SAKE-", "-DEPOSIT-"):
                     value = values["-VALUE-"].strip()
-                    msg = ""
-                    try:
-                        float(str(value).replace(",", "."))
-                    except ValueError:
-                        nome_operacao = EVENT_NAMES.get(operacao_atual, "operação selecionada")
-                        msg = f"Valor inválido para {nome_operacao}. Informe um número maior que zero."
-                        self.screen_update(msg)
-                        continue
-
                     if operacao_atual == "-SAKE-":
                         success, msg = self.bankOperation.sake(value)
-                        if success:
-                            novo_saldo = f"{self.bankOperation.balance():.2f}"
-                            self.bank_operation["account"][0]["total"] = novo_saldo
-                            msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
-                    elif operacao_atual == "-DEPOSIT-":
+                    else:
                         success, msg = self.bankOperation.deposit(value)
-                        if success:
-                            novo_saldo = f"{self.bankOperation.balance():.2f}"
-                            self.bank_operation["account"][0]["total"] = novo_saldo
-                            msg += f"\nSaldo atual: R$ {float(self.bankOperation.balance()):.2f}"
+
+                    if success:
+                        saldo_atual = self.bankOperation.balance()
+                        self.bank_operation["account"][0]["total"] = f"{saldo_atual:.2f}"
+                        msg = f"{msg}\nSaldo atual: R$ {saldo_atual:.2f}"
+
                     self.window["-VALUE-"].update("")
                     self.screen_update(msg)
                 operacao_atual = None
