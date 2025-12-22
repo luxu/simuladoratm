@@ -39,7 +39,7 @@ pip install freesimplegui
 Com o ambiente virtual ativado execute:
 
 ```bash
-python caixa_eletronico.py
+python atm_initial.py
 ```
 
 ## Passo a passo de utilização
