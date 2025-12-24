@@ -57,7 +57,14 @@ class Cliente:
 
 
 class PessoaFisica(Cliente):
-    ...
+    def __init__(self, nome, data_nascimento, cpf, endereco):
+        super().__init__(endereco)
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+        self.cpf = cpf
+
+    def __repr__(self) -> str:
+        return f"<Cliente: ({self.cpf})>)"
 
 
 class Conta:
@@ -69,6 +76,10 @@ class ContaCorrente(Conta):
         super().__init__(numero, cliente)
         self._limite = limite
         self._limite_saques = limite_saques
+
+    @classmethod
+    def nova_conta(cls, cliente, numero, limite, limite_saques):
+        return cls(numero, cliente, limite, limite_saques)
 
     def sacar(self, valor):
         numero_saques = len(
@@ -88,6 +99,9 @@ class ContaCorrente(Conta):
             return super().sacar(valor)
 
         return False
+
+    def __repr__(self):
+        return f"""<{self.__class__.__name__}: ('{self.agencia}', '{self.numero}', '{self.cliente.nome}')>"""
 
     def __str__(self):
         return f"""\
@@ -142,9 +156,16 @@ class Deposito(Transacao):
 
 
 def log_transacao(func):
-    # Data/Hora que chamou a função
-    # Nome da função (Dep, sacar, etc)
-    ...
+    def envelope(*args, **kwargs):
+        resultado = func(*args, **kwargs)
+        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # TODOs: alterar a implementação para salvar em arquivo
+        # f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}
+        # Retornou {result} \n"
+        print(f"{data_hora}: {func.__name__.upper()}")
+        return resultado
+
+    return envelope
 
 
 
