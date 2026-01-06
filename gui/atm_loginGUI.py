@@ -14,7 +14,6 @@ class LoginGUI:
             [sg.Text("CPF", size=(18, 1)), sg.Combo(self.cpf_cliente, size=(18, 1), key="-CPF-", enable_events=True)],
             [sg.Text("Conta", size=(18, 1)),
              sg.Combo([], key="-ACCOUNT-", readonly=True, size=(24, 1), enable_events=False, ), ],
-            [sg.Text("Senha", size=(18, 1)), sg.Input(key="-PASSWORD-", password_char="*")],
             [sg.Text("", key="-ERRORS-", size=(40, 3), text_color="red", background_color="lightyellow",
                      visible=False, )],
             [sg.Push(), sg.Button("Cancelar", key="-CANCEL-", button_color=("white", "#A93226")),
@@ -35,7 +34,6 @@ class LoginGUI:
     def _validate(self, values):
         errors = []
         cpf = self._sanitizar_cpf(values.get("-CPF-", ""))
-        password = values.get("-PASSWORD-", "")
         account_id = values.get("-ACCOUNT-", "")
 
         client = None
@@ -48,9 +46,6 @@ class LoginGUI:
             else:
                 client = matching_clients[0]
 
-        if not password:
-            errors.append("Informe a senha.")
-
         account = []
         if account_id:
             account = [account for account in self.accounts if account['number_account'] == account_id]
@@ -58,9 +53,6 @@ class LoginGUI:
                 errors.append("Conta selecionada inválida.")
         else:
             errors.append("Selecione uma conta.")
-
-        if client and password and client['password'] != password:
-            errors.append("Senha incorreta.")
 
         if errors:
             return errors, None

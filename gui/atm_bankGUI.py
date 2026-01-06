@@ -1,7 +1,7 @@
 import FreeSimpleGUI as sg
 
 from partials import elements_screen
-from atm_service import BankOperation
+from service.atm_service import BankOperation
 
 
 EVENT_NAMES = {

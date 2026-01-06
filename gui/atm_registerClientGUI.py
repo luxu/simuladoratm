@@ -1,15 +1,38 @@
 import re
+from fileinput import close
+
+from faker import Faker
 
 import FreeSimpleGUI as sg
+
+faker = Faker('pt_BR')
 
 class RegisterClientGUI:
     def __init__(self, clients):
         sg.theme("SystemDefault")
         self.clients = clients
         self.layout = [
-            [sg.Text("Cadastrar Cliente - Todas novas contas começam com R$ 1.000,00", font=("Arial", 14, "bold"), )],
-            [sg.Text("Nome", size=(18, 1)), sg.Input(key="-NAME-", focus=True)],
+            [sg.Text("Cadastrar Cliente", font=("Arial", 14, "bold"), )],
+            [
+                sg.Text("Nome", size=(18, 1)),
+                sg.Input(key="-NAME-"),
+                sg.Button("Gerar cliente", key="-GENERATE_CLIENT_FAKE-",)
+             ],
             [sg.Text("CPF", size=(18, 1)), sg.Input(key="-CPF-")],
+
+            [
+                sg.Text("Data Nascimento", size=(18, 1)),
+                sg.Input(key="-DT_NASC-"),
+                sg.CalendarButton(
+                    "DT Nasc",
+                    close_when_date_chosen=True,
+                    target="-DT_NASC-",
+                    no_titlebar=True,
+                ),
+
+            ],
+
+            [sg.Text("Endereço", size=(18, 1)), sg.Input(key="-ENDERECO-")],
             [sg.Text("", key="-ERROS-", size=(40, 3), text_color="red", background_color="lightyellow",visible=False, )],
             [sg.Push(),sg.Button("Cancelar", key="-CANCELAR-", button_color=("white", "#A93226")),
                 sg.Button("Cadastrar cliente", key="-CADASTRAR-", button_color=("white", "#1E8449"), ),
@@ -39,8 +62,7 @@ class RegisterClientGUI:
             return errors, dados
         dados = {
             "name": name,
-            "cpf": cpf_numbers,
-            "password": '123'
+            "cpf": cpf_numbers
         }
         return errors, dados
 
@@ -50,6 +72,8 @@ class RegisterClientGUI:
             if event in (sg.WIN_CLOSED, "-CANCELAR-"):
                 cadastro = None
                 break
+            if event == "-GENERATE_CLIENT_FAKE-":
+                self.window["-NAME-"].update(faker.name())
             if event == "-CADASTRAR-":
                 erros, cadastro = self._validar_campos(values)
                 if erros:

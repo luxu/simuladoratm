@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Simulador de ATM"
 requires-python = ">=3.13"
 dependencies = [
+    "faker>=40.1.0",
     "freesimplegui>=5.2.0.post1",
 ]
 

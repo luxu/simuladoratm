@@ -5,7 +5,7 @@ from typing import Dict, List
 class ClientRepository:
     """Repository for managing client records stored in a CSV file."""
 
-    fieldnames = ["name", "cpf", "password"]
+    fieldnames = ["name", "cpf"]
 
     def __init__(self, csv_path: str):
         self.csv_path = csv_path

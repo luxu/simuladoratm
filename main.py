@@ -1,20 +1,32 @@
 import csv
+from pathlib import Path
 
 import FreeSimpleGUI as sg
 
-from atm_bankGUI import BankGUI
-from atm_homeScreenGUI import HomeScreenlGUI
-from atm_loginGUI import LoginGUI
-from atm_registerAccountGUI import RegisterAccountGUI
-from atm_registerClientGUI import RegisterClientGUI
-from repositories import AccountRepository, ClientRepository
+from gui.atm_bankGUI import BankGUI
+from gui.atm_homeScreenGUI import HomeScreenlGUI
+from gui.atm_loginGUI import LoginGUI
+from gui.atm_registerAccountGUI import RegisterAccountGUI
+from gui.atm_registerClientGUI import RegisterClientGUI
+from repository.atm_repositories import AccountRepository, ClientRepository
+from tools.atm_tools import create_file
+
+ROOT_PATH = Path(__file__).parent / "databases"
 
 
 def main():
     client_csv = "list_client.csv"
+    path_filename_client = ROOT_PATH / client_csv
+    create_file(path_filename_client)
+
     accounts_csv = "list_accounts.csv"
-    clients_repo = ClientRepository(client_csv)
-    accounts_repo = AccountRepository(accounts_csv)
+    path_filename_accounts = ROOT_PATH / client_csv
+    create_file(path_filename_accounts)
+
+    clients_repo = ClientRepository(str(path_filename_client))
+
+    accounts_repo = AccountRepository(str(path_filename_accounts))
+
     catalog_clients = clients_repo.all()
     catalog_accounts = accounts_repo.all()
     while True:
