@@ -2,6 +2,18 @@
 
 Aplicação desktop em Python que simula o fluxo de atendimento de um caixa eletrônico: cadastro, login e operações bancárias básicas utilizando a biblioteca [FreeSimpleGUI](https://freesimplegui.readthedocs.io/).
 
+<p align="center">
+  <img src="img/tela_inicial.JPG" alt="Interface do Simulador ATM" width="200" height="200">
+  <br>
+  <em>Figura 1: Tela inicial do sistema de banco</em>
+</p>
+
+<p align="center">
+  <img src="img/tela_bank.JPG" alt="Interface do Simulador ATM" width="200" height="200">
+  <br>
+  <em>Figura 2: Tela principal do sistema de banco</em>
+</p>
+
 ## Requisitos
 
 - Python 3.13 ou superior
