@@ -39,7 +39,7 @@ pip install freesimplegui
 Com o ambiente virtual ativado execute:
 
 ```bash
-python atm_initial.py
+python main.py
 ```
 
 ## Passo a passo de utilização
@@ -51,10 +51,13 @@ python atm_initial.py
 2. **Cadastro de cliente** – Informe nome completo, CPF, senha e depósito inicial. Ao confirmar, o cliente é criado e a conta inicial é registrada automaticamente.
 3. **Cadastro de conta** – Digite o CPF de um cliente existente. Se encontrado, o nome é bloqueado para edição; basta informar o depósito inicial para criar a nova conta.
 4. **Login** – Informe CPF e senha. Caso o cliente possua múltiplas contas, selecione qual deseja movimentar no combo box exibido no topo da tela de autoatendimento.
-5. **Autoatendimento** – Consulte o saldo atual, realize depósitos, saques ou confira o extrato da conta selecionada. Alterações de conta no combo box atualizam os valores imediatamente.
+5. **Arquivos** - São criados 3 arquivos na pasta database: list_account.csv, list_client.csv e list_histories.csv que servem para armazenar as informações para futuras iterações com o simulador.
+6. **Autoatendimento** – Consulte o saldo atual, realize depósitos, saques ou confira o extrato da conta selecionada. Alterações de conta no combo box atualizam os valores imediatamente.
 6. **Encerramento** – Feche a janela do autoatendimento ou retorne à tela inicial para sair do simulador. Todos os dados ficam apenas em memória e são descartados quando o programa é encerrado.
 
-## Dicas
+## Sugestões
 
-- Para iniciar com dados limpos basta encerrar o programa; todas as informações ficam apenas em memória.
-- Se o FreeSimpleGUI apresentar mensagens sobre temas ou fontes, verifique se o sistema operacional possui as fontes padrões do Windows instaladas.
+- Tem alguns bugs que precisam ser corrigidos, então faça o fork e abra uma PR caso encontre algum.
+- Como os comandos nas linguagens são em inglês também tenho como premissa desenvolver tudo em inglês, creio ser uma boa prática.
+
+### That´s all folks!
