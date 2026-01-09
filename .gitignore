@@ -10,5 +10,5 @@ wheels/
 .venv
 .idea
 .env
-list_*.dev
+list_*.csv
 *.txt
