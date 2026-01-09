@@ -22,6 +22,11 @@ class HomeScreenlGUI:
                 sg.Button("Cadastrar conta", key="-REGISTER-ACCOUNT-", size=(18, 2), button_color=("white", "#117A65"),),
                 sg.Push(),
             ],
+            [
+                sg.Push(),
+                sg.Button("Listar contas do banco", key="-LIST-ACCOUNTS-", size=(18, 2), button_color=("white", "#117A65"),),
+                sg.Push(),
+            ],
             [sg.HorizontalSeparator()],
             [
                 sg.Push(),
@@ -45,6 +50,9 @@ class HomeScreenlGUI:
                 break
             if event == "-REGISTER-ACCOUNT-":
                 escolha = "register_account"
+                break
+            if event == "-LIST-ACCOUNTS-":
+                escolha = "list_accounts"
                 break
         self.window.close()
         return escolha

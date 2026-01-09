@@ -1,4 +1,12 @@
+from pathlib import Path
+
 import FreeSimpleGUI as sg
+
+# Pega a pasta onde o script atual está
+BASE_DIR = Path(__file__).parent
+
+# Sobe um nível e entra na pasta 'img'
+caminho_logo = BASE_DIR.parent / "img" / "logo_caixa.png"
 
 
 def _build_side_buttons() -> tuple[list[list[sg.Button]], list[list[sg.Button]]]:
@@ -46,7 +54,7 @@ def _build_header() -> sg.Frame:
     """Construct the header frame for the window."""
     header = [[
         sg.Push(background_color="#003366"),
-        sg.Image(filename="logo_caixa.png", size=(120, 50), background_color="#003366"),
+        sg.Image(filename=str(caminho_logo), size=(120, 50), background_color="#003366"),
         sg.Column([
             [sg.Text(
                 "SIMULADOR CX ELETRÔNICO",
@@ -81,8 +89,8 @@ def get_layout(banking_operation):
     current_account = banking_operation.get("account")[0]
     initial_message = (
         f"Bem vindo, {client['name']}!\n"
-        f"Conta ativa: {current_account['number_account']}\n"
-        f"Saldo atual: R$ {current_account['total']}"
+        f"Conta ativa: {current_account['number_bank']}\n"
+        f"Saldo atual: R$ {current_account['balance']}"
         if client
         else "Bem vindo!"
     )
@@ -103,7 +111,7 @@ def get_layout(banking_operation):
             [sg.Text(f"Cliente: {client['name']}", font=("Arial", 10, "bold"), text_color="black",
                      background_color="#C0C0C0", ),
              sg.Push(),
-             sg.Text(f"Conta: {current_account['number_account']}", key="-CONTA-ATIVA-", font=("Arial", 10, "bold"),
+             sg.Text(f"Conta: {current_account['number_bank']}", key="-CONTA-ATIVA-", font=("Arial", 10, "bold"),
                      text_color="black", background_color="#C0C0C0", ), ]
         ], pad=(10, 0), background_color="#C0C0C0", border_width=0, )
          ],

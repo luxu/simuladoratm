@@ -27,7 +27,7 @@ class LoginGUI:
 
     def _update_accounts_available(self, cpf: str) -> None:
         cpf_number = self._sanitizar_cpf(cpf)
-        accounts = [account['number_account'] for account in self.accounts if account['cpf'] == cpf_number]
+        accounts = [account['number_bank'] for account in self.accounts if account['cpf_client'] == cpf_number]
         valor_padrao = accounts[0] if len(accounts) == 1 else ""
         self.window["-ACCOUNT-"].update(values=accounts, value=valor_padrao)
 
@@ -48,7 +48,7 @@ class LoginGUI:
 
         account = []
         if account_id:
-            account = [account for account in self.accounts if account['number_account'] == account_id]
+            account = [account for account in self.accounts if account['number_bank'] == account_id]
             if not account:
                 errors.append("Conta selecionada inválida.")
         else:

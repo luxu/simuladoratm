@@ -7,6 +7,7 @@ import FreeSimpleGUI as sg
 
 faker = Faker('pt_BR')
 
+
 class RegisterClientGUI:
     def __init__(self, clients):
         sg.theme("SystemDefault")
@@ -22,17 +23,19 @@ class RegisterClientGUI:
 
             [
                 sg.Text("Data Nascimento", size=(18, 1)),
-                sg.Input(key="-DT_NASC-"),
+                sg.Input(key="-'DATE-OF-BIRTH'-"),
                 sg.CalendarButton(
                     "DT Nasc",
                     close_when_date_chosen=True,
-                    target="-DT_NASC-",
+                    target="-'DATE-OF-BIRTH'-",
                     no_titlebar=True,
                 ),
-
             ],
-
-            [sg.Text("Endereço", size=(18, 1)), sg.Input(key="-ENDERECO-")],
+            [
+                sg.Text("Endereço", size=(18, 1)),
+                sg.Input(key="-ADDRESS-"),
+                sg.Button("Gerar Endereço", key="-GENERATE_ADDRESS_FAKE-",),
+            ],
             [sg.Text("", key="-ERROS-", size=(40, 3), text_color="red", background_color="lightyellow",visible=False, )],
             [sg.Push(),sg.Button("Cancelar", key="-CANCELAR-", button_color=("white", "#A93226")),
                 sg.Button("Cadastrar cliente", key="-CADASTRAR-", button_color=("white", "#1E8449"), ),
@@ -43,26 +46,36 @@ class RegisterClientGUI:
     def _validar_campos(self, values):
         errors = []
         dados = {}
-        cpf = values.get("-CPF-", "")
-        cpf_numbers = re.sub(r"\D", "", cpf)
-        # Validar se os dados não vieram vazios
+        ######### Validar se os dados não vieram vazios
+        cpf_numbers = values.get("-CPF-", "")
         if len(cpf_numbers) < 1:
             errors.append("CPF está em branco. Preencha.")
         name = values.get("-NAME-", "").strip()
         if not name:
             errors.append("Nome é obrigatório.")
-        # Validar se os dados já existem
+        address = values.get("-ADDRESS-", "").strip()
+        if not address:
+            errors.append("Endereço é obrigatório.")
+        date_of_birth = values.get("-'DATE-OF-BIRTH'-", "").strip()
+        if not date_of_birth:
+            errors.append("Data de Nascimento é obrigatório.")
+
+######### Validar se os dados já existem
         name_client_exists = [client for client in self.clients if client.get('name') == name]
         if name_client_exists:
             errors.append("Nome já cadastrado. Reveja!")
             return errors, dados
+
         cpf_client_exists = [client for client in self.clients if client.get('cpf') == cpf_numbers]
         if cpf_client_exists:
             errors.append("CPF já cadastrado. Reveja!")
             return errors, dados
+
         dados = {
             "name": name,
-            "cpf": cpf_numbers
+            "cpf": cpf_numbers,
+            "address": address,
+            "date_of_birth": date_of_birth,
         }
         return errors, dados
 
@@ -74,6 +87,8 @@ class RegisterClientGUI:
                 break
             if event == "-GENERATE_CLIENT_FAKE-":
                 self.window["-NAME-"].update(faker.name())
+            if event == "-GENERATE_ADDRESS_FAKE-":
+                self.window["-ADDRESS-"].update(faker.address())
             if event == "-CADASTRAR-":
                 erros, cadastro = self._validar_campos(values)
                 if erros:
